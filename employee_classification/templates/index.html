@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Leave Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Employee Leave Prediction</h1>
+    <form action="{{ url_for('predict') }}" method="POST">
+        <label for="education">Education:</label>
+        <input type="text" name="education" required>
+
+        <label for="joining_year">Joining Year:</label>
+        <input type="number" name="joining_year" required>
+
+        <label for="city">City:</label>
+        <input type="text" name="city" required>
+
+        <label for="payment_tier">Payment Tier:</label>
+        <input type="number" name="payment_tier" required>
+
+        <label for="age">Age:</label>
+        <input type="number" name="age" required>
+
+        <label for="gender">Gender:</label>
+        <input type="text" name="gender" required>
+
+        <label for="ever_benched">Ever Benched:</label>
+        <input type="text" name="ever_benched" required>
+
+        <label for="experience">Experience in Current Domain:</label>
+        <input type="number" name="experience" required>
+
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>

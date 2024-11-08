@@ -123,6 +123,7 @@ celerybeat.pid
 
 # Environments
 envn1/
+venv1/
 .env
 .venv
 env/
@@ -164,3 +165,5 @@ cython_debug/
 
 # html file 
 notebook/*.html
+
+venv1/
