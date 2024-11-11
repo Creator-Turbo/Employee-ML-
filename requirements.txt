@@ -5,4 +5,5 @@ tensorflow
 ydata-profiling
 numpy
 Flask
+mlflow 
 

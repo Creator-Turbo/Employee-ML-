@@ -1,20 +1,15 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
+import joblib
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
 
 app = Flask(__name__)
 
-# Load and preprocess data
-df = pd.read_csv('C:\\Users\\ASUS\\OneDrive\\Desktop\\Employee\\Employee-ML-\\employee_classification\\Employee.csv')
-X = df.drop('LeaveOrNot', axis=1)
-y = df['LeaveOrNot']
-
-# Basic encoding and model setup
-X = pd.get_dummies(X, drop_first=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-model = RandomForestClassifier()
-model.fit(X_train, y_train)
+# Load the saved model
+model = joblib.load('notebook/best_model_MLP.pkl')
 
 @app.route('/')
 def index():
@@ -23,21 +18,58 @@ def index():
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.form
-    input_data = {
-        'Education': data['education'],
-        'Joining Year': int(data['joining_year']),
-        'City': data['city'],
-        'Payment Tier': int(data['payment_tier']),
-        'Age': int(data['age']),
-        'Gender': data['gender'],
-        'Ever Benched': data['ever_benched'],
-        'Experience in Current Domain': int(data['experience'])
-    }
-    input_df = pd.DataFrame([input_data])
-    input_df = pd.get_dummies(input_df).reindex(columns=X.columns, fill_value=0)
-    prediction = model.predict(input_df)[0]
 
-    return render_template('result.html', prediction=prediction)
+    # # Map Gender and EverBenched to integers
+    # gender_map = {'Male': 0, 'Female': 1}
+    # benched_map = {'Yes': 1, 'No': 0}
+    # education_map={'Bachelors':1,'Masters':2}
+
+    features = {
+    'Age': [int(data['age'])],
+    'Gender': [(data['gender'])],
+    'PaymentTier': [int(data['payment_tier'])],
+    'ExperienceInCurrentDomain': [int(data['experience'])],
+    'Education': [(data['education'])],
+    'City': [(data['city'])], # for the some time using integer for this 
+    'JoiningYear': [int(data['joining_year'])],
+    'EverBenched': [(data['ever_benched'])]
+
+}
+
+# # Create a dictionary for the input features
+#     features = {
+#             'Age': [int(data.get('age', 0))],
+#             'Gender': [gender_map.get(data.get('gender', 'Male'))],
+#             'PaymentTier': [int(data.get('payment_tier', 0))],
+#             'ExperienceInCurrentDomain': [int(data.get('experience', 0))],
+#             'Education': [education_map.get('Bachelors','Masters')],
+#             'City': [data.get('city', '')],
+#             'JoiningYear': [int(data.get('joining_year', 0))],
+#             'EverBenched': [benched_map.get(data.get('ever_benched', 'No'))]
+#         }
+
+
+
+    # Convert the features to a DataFrame
+    features_df = pd.DataFrame(features)
+    # # Ensure the correct data types for each column
+    # features_df['City'] = features_df['City'].astype(str)
+     
+    features_df=features_df.dropna()
+    # Apply one-hot encoding on the specified columns (ensure to pass a list of column names)
+    features_df1 = pd.get_dummies(features_df, columns=['Gender', 'Education', 'City', 'EverBenched'])
+    
+
+
+    # Make prediction
+    prediction = model.predict(features_df)[0]
+
+    prediction_text = 'Leave' if prediction == 1 else 'Stay'
+
+    # Render result.html and pass the prediction result
+    return render_template('result.html', prediction=prediction_text)
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
